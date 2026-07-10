@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex, nofollow, noarchive">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Auditoría de Cartera · GLOBALAS</title>
+<style>
+:root{ color-scheme: light; --azul:#1F5FA8; --negro:#111; --rojo:#C0392B; --amar:#B8860B; --verde:#1E8449;
+ --rojobg:#F7D6D1; --amarbg:#FBEFC7; --verdebg:#D6ECDD; --gris:#EEE; --grisos:#555; --linea:#DDD;}
+*{box-sizing:border-box}
+body{margin:0;font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;background:#fff;color:#111;font-size:14px}
+.wrap{max-width:1180px;margin:0 auto;padding:14px}
+.head{background:var(--negro);color:#fff;border-bottom:3px solid var(--azul);border-radius:8px 8px 0 0;
+ display:flex;justify-content:space-between;align-items:center;padding:14px 18px;gap:12px;flex-wrap:wrap}
+.head h1{margin:0;font-size:26px;letter-spacing:1px}
+.head .sub{font-size:12px;color:#BFD3EC;text-align:right;line-height:1.4}
+.legend{background:var(--gris);padding:8px 14px;border-radius:0 0 8px 8px;font-size:12px;display:flex;gap:14px;flex-wrap:wrap;align-items:center}
+.dot{font-weight:700}.dot.r{color:var(--rojo)}.dot.a{color:var(--amar)}.dot.v{color:var(--verde)}
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:14px 0}
+.kpi{border-radius:8px;padding:12px;color:#fff;text-align:center}
+.kpi .t{font-size:11px;font-weight:700;opacity:.95}.kpi .v{font-size:22px;font-weight:800;margin:2px 0}.kpi .s{font-size:11px;opacity:.9}
+.kpi.tot{background:var(--azul)}.kpi.r{background:var(--rojo)}.kpi.a{background:var(--amar)}.kpi.v{background:var(--verde)}
+.controls{display:flex;gap:10px;flex-wrap:wrap;align-items:end;margin:6px 0 12px;padding:12px;border:1px solid var(--linea);border-radius:8px;background:#FAFAFB}
+.controls label{display:flex;flex-direction:column;font-size:11px;color:var(--grisos);font-weight:700;gap:3px}
+.controls select,.controls input{font-size:13px;padding:7px 9px;border:1px solid #C9C9C9;border-radius:6px;background:#fff;min-width:150px}
+.controls input#q{min-width:230px}
+.btns{display:flex;gap:8px;margin-left:auto;flex-wrap:wrap}
+button{font-size:13px;font-weight:700;padding:9px 14px;border-radius:6px;border:1px solid var(--azul);cursor:pointer}
+button.pri{background:var(--azul);color:#fff}button.sec{background:#fff;color:var(--azul)}
+button.ghost{background:#fff;color:var(--grisos);border-color:#C9C9C9}
+.tabsw{display:inline-flex;border:1px solid #C9C9C9;border-radius:6px;overflow:hidden}
+.tabsw button{border:none;border-radius:0;background:#fff;color:var(--grisos)}
+.tabsw button.on{background:var(--negro);color:#fff}
+.meta{font-size:12px;color:var(--grisos);margin:4px 2px 10px}
+.tablewrap{border:1px solid var(--linea);border-radius:8px;overflow:auto}
+table{border-collapse:collapse;width:100%;font-size:12px}
+th,td{padding:6px 8px;border-bottom:1px solid #ECECEC;text-align:left;vertical-align:middle}
+th{background:var(--negro);color:#fff;position:sticky;top:0;cursor:pointer;white-space:nowrap;font-size:11px}
+th .ar{opacity:.5;font-size:10px}
+td.num,th.num{text-align:right}td.ctr,th.ctr{text-align:center}
+tr.r{background:var(--rojobg)}tr.a{background:var(--amarbg)}tr.v{background:var(--verdebg)}
+.sem{font-weight:700;white-space:nowrap}.sem.r{color:var(--rojo)}.sem.a{color:var(--amar)}.sem.v{color:var(--verde)}
+.note{font-size:11px;color:var(--grisos);margin:8px 2px}
+.printhead{display:none}
+@media print{
+ body{font-size:10px}.wrap{max-width:none;padding:0}
+ .controls,.legend,.btns,.kpis .s,.tabsw{display:none !important}
+ .kpis{grid-template-columns:repeat(4,1fr);gap:6px}
+ .head{border-radius:0}
+ .printhead{display:block;margin:6px 0;font-size:11px;color:#000}
+ .tablewrap{border:none;overflow:visible}
+ th{position:static}
+ @page{size:landscape;margin:10mm}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="head">
+    <h1>GLOBALAS</h1>
+    <div class="sub"><b>AUDITORÍA DE CARTERA · PÓLIZAS POR PAGAR</b><br>
+    Corte: viernes 10 de julio de 2026 · Fuente: correo “ENVÍO DE CARTERAS”<br>
+    <i>Excluye la colectiva 4G ARCHITECTURE SAS</i></div>
+  </div>
+  <div class="legend">
+    <span><b>Semáforo</b> = días en cartera (hoy − inicio de vigencia):</span>
+    <span class="dot r">● ROJO</span><span>≥ 30 días</span>
+    <span class="dot a">● AMARILLO</span><span>20–29 días</span>
+    <span class="dot v">● VERDE</span><span>&lt; 20 días</span>
+  </div>
+
+  <div class="kpis" id="kpis"></div>
+
+  <div class="printhead" id="printhead"></div>
+
+  <div class="controls">
+    <label>Sección
+      <span class="tabsw">
+        <button id="tabA" class="on" onclick="setSec('aseg')">Aseguradoras</button>
+        <button id="tabF" onclick="setSec('fin')">Financiadas</button>
+      </span>
+    </label>
+    <label>Cliente / Tomador
+      <select id="cliente"><option value="">— Todos —</option></select>
+    </label>
+    <label id="lblAseg">Aseguradora
+      <select id="aseg"><option value="">— Todas —</option></select>
+    </label>
+    <label>Semáforo
+      <select id="sem">
+        <option value="">— Todos —</option>
+        <option value="ROJO">Rojo</option>
+        <option value="AMARILLO">Amarillo</option>
+        <option value="VERDE">Verde</option>
+      </select>
+    </label>
+    <label>Buscar
+      <input id="q" type="text" placeholder="cliente, póliza, ramo, placa...">
+    </label>
+    <div class="btns">
+      <button class="ghost" onclick="clearF()">Limpiar</button>
+      <button class="sec" onclick="expCSV()">Exportar CSV</button>
+      <button class="pri" onclick="window.print()">Descargar PDF</button>
+    </div>
+  </div>
+  <div class="meta" id="meta"></div>
+  <div class="tablewrap"><table id="tbl"><thead></thead><tbody></tbody></table></div>
+  <div class="note" id="note"></div>
+</div>
+
+<script>
+const DATA = {"aseguradoras": [{"aseguradora": "ZURICH", "tomador": "CIMACO S A S", "poliza": "228920207", "ramo": "Eng. Lines", "placa": "", "inicio_vig": "2025-11-05", "dias_cartera": 247.0, "saldo": 9442650, "nota": "archivo 03-jul", "semaforo": "ROJO"}, {"aseguradora": "BERKLEY", "tomador": "CONSORCIO VECTOR", "poliza": "106220", "ramo": "CAU05", "placa": "", "inicio_vig": "2026-03-06", "dias_cartera": 126.0, "saldo": 307943, "nota": "", "semaforo": "ROJO"}, {"aseguradora": "ZURICH", "tomador": "RUGELO SAS", "poliza": "248501618", "ramo": "Property", "placa": "", "inicio_vig": "2026-04-04", "dias_cartera": 97.0, "saldo": 509708, "nota": "archivo 03-jul", "semaforo": "ROJO"}, {"aseguradora": "ZURICH", "tomador": "EDIFICIO BAVARIA PLAZA", "poliza": "254314730", "ramo": "Financial lines", "placa": "", "inicio_vig": "2026-04-11", "dias_cartera": 90.0, "saldo": 119000, "nota": "archivo 03-jul", "semaforo": "ROJO"}, {"aseguradora": "ZURICH", "tomador": "EDIFICIO BAVARIA PLAZA", "poliza": "254309125", "ramo": "Property", "placa": "", "inicio_vig": "2026-04-11", "dias_cartera": 90.0, "saldo": 3264500, "nota": "archivo 03-jul", "semaforo": "ROJO"}, {"aseguradora": "ZURICH", "tomador": "EDIFICIO BAVARIA PLAZA", "poliza": "254312703", "ramo": "Liability", "placa": "", "inicio_vig": "2026-04-11", "dias_cartera": 90.0, "saldo": 544394, "nota": "archivo 03-jul", "semaforo": "ROJO"}, {"aseguradora": "ZURICH", "tomador": "CONSTRUCCIONES SIERRA PEREZ SAS", "poliza": "259490324", "ramo": "Property", "placa": "", "inicio_vig": "2026-05-25", "dias_cartera": 46.0, "saldo": 6949067, "nota": "archivo 03-jul", "semaforo": "ROJO"}, {"aseguradora": "ZURICH", "tomador": "ORLANDESCA S.A.", "poliza": "265120598", "ramo": "Property", "placa": "", "inicio_vig": "2026-05-26", "dias_cartera": 45.0, "saldo": 6553682, "nota": "archivo 03-jul", "semaforo": "ROJO"}, {"aseguradora": "ZURICH", "tomador": "ORLANDESCA S.A.", "poliza": "265135005", "ramo": "Liability", "placa": "", "inicio_vig": "2026-05-26", "dias_cartera": 45.0, "saldo": 1118488, "nota": "archivo 03-jul", "semaforo": "ROJO"}, {"aseguradora": "ALLIANZ", "tomador": "VISBAL SALGADO,JAIME ALFONSO", "poliza": "23534861", "ramo": "Vida_Ind", "placa": "", "inicio_vig": "2026-05-30", "dias_cartera": 41.0, "saldo": 505447, "nota": "corte 05-jul", "semaforo": "ROJO"}, {"aseguradora": "SURA", "tomador": "CALCAREOS S.A.", "poliza": "90000892201", "ramo": "SALUD FAMILIAR", "placa": "", "inicio_vig": "2026-06-01", "dias_cartera": 39.0, "saldo": 14855362, "nota": "", "semaforo": "ROJO"}, {"aseguradora": "HDI", "tomador": "DE NEGOCIOS Y PROYECTOS SAS SIGLA SONEP", "poliza": "608280", "ramo": "PRODUCTO UNICO DE AUTO", "placa": "TDW047", "inicio_vig": "2026-06-02", "dias_cartera": 38.0, "saldo": 557850, "nota": "", "semaforo": "ROJO"}, {"aseguradora": "HDI", "tomador": "DE NEGOCIOS Y PROYECTOS SAS SIGLA SONEP", "poliza": "608280", "ramo": "PRODUCTO UNICO DE AUTO", "placa": "IEP662", "inicio_vig": "2026-06-02", "dias_cartera": 38.0, "saldo": 196678, "nota": "", "semaforo": "ROJO"}, {"aseguradora": "HDI", "tomador": "DE NEGOCIOS Y PROYECTOS SAS SIGLA SONEP", "poliza": "608280", "ramo": "PRODUCTO UNICO DE AUTO", "placa": "TFR645", "inicio_vig": "2026-06-02", "dias_cartera": 38.0, "saldo": 732372, "nota": "", "semaforo": "ROJO"}, {"aseguradora": "HDI", "tomador": "DE NEGOCIOS Y PROYECTOS SAS SIGLA SONEP", "poliza": "608280", "ramo": "PRODUCTO UNICO DE AUTO", "placa": "TTN607", "inicio_vig": "2026-06-02", "dias_cartera": 38.0, "saldo": 732372, "nota": "", "semaforo": "ROJO"}, {"aseguradora": "HDI", "tomador": "DE NEGOCIOS Y PROYECTOS SAS SIGLA SONEP", "poliza": "608280", "ramo": "PRODUCTO UNICO DE AUTO", "placa": "NGY563", "inicio_vig": "2026-06-02", "dias_cartera": 38.0, "saldo": 317623, "nota": "", "semaforo": "ROJO"}, {"aseguradora": "HDI", "tomador": "DE NEGOCIOS Y PROYECTOS SAS SIGLA SONEP", "poliza": "608280", "ramo": "PRODUCTO UNICO DE AUTO", "placa": "DTZ332", "inicio_vig": "2026-06-02", "dias_cartera": 38.0, "saldo": 193618, "nota": "", "semaforo": "ROJO"}, {"aseguradora": "ALLIANZ", "tomador": "BOLAÐO CANTILLO, PILAR DEL SOCORRO", "poliza": "23442007", "ramo": "Automóviles", "placa": "LWW054", "inicio_vig": "2026-06-07", "dias_cartera": 33.0, "saldo": 3556473, "nota": "corte 05-jul", "semaforo": "ROJO"}, {"aseguradora": "SURA", "tomador": "LUIS ANGEL HERNAN PULIDO", "poliza": "40005727243", "ramo": "AUTOMOVILES", "placa": "", "inicio_vig": "2026-06-11", "dias_cartera": 29.0, "saldo": 300803, "nota": "", "semaforo": "AMARILLO"}, {"aseguradora": "SURA", "tomador": "SANTA MARIA DEL MAR S.A.S", "poliza": "12004523144", "ramo": "CUMPLIMIENTO", "placa": "", "inicio_vig": "2026-06-12", "dias_cartera": 28.0, "saldo": 1454180, "nota": "", "semaforo": "AMARILLO"}, {"aseguradora": "SURA", "tomador": "ORTOPEDICA", "poliza": "900000833795", "ramo": "AUTOMOVILES", "placa": "", "inicio_vig": "2026-06-13", "dias_cartera": 27.0, "saldo": 1142613, "nota": "", "semaforo": "AMARILLO"}, {"aseguradora": "SURA", "tomador": "ALBERTO DE JESUS ARCIERI NARVAEZ", "poliza": "90001019207", "ramo": "SALUD FAMILIAR", "placa": "", "inicio_vig": "2026-06-15", "dias_cartera": 25.0, "saldo": 4918244, "nota": "", "semaforo": "AMARILLO"}, {"aseguradora": "SURA", "tomador": "GLOBALAS LIMITADA", "poliza": "90001503343", "ramo": "SALUD FAMILIAR", "placa": "", "inicio_vig": "2026-06-15", "dias_cartera": 25.0, "saldo": 2379676, "nota": "", "semaforo": "AMARILLO"}, {"aseguradora": "BOLIVAR", "tomador": "CONSTRUCCIONES SIERRA PEREZ SA", "poliza": "1070562374302", "ramo": "AUTOMOVILES", "placa": "", "inicio_vig": "2026-06-16", "dias_cartera": 24.0, "saldo": 8784573, "nota": "OCR-verificar fecha", "semaforo": "AMARILLO"}, {"aseguradora": "SOLIDARIA", "tomador": "NOVOA CARDENAS NIDIS JOHANA", "poliza": "994000004295", "ramo": "AUTOMOVILES PARTIC", "placa": "", "inicio_vig": "2026-06-17", "dias_cartera": 23.0, "saldo": 1123783, "nota": "", "semaforo": "AMARILLO"}, {"aseguradora": "SURA", "tomador": "MOISES DAVID ACENDRA SENIOR", "poliza": "900001618099", "ramo": "AUTOMOVILES", "placa": "", "inicio_vig": "2026-06-17", "dias_cartera": 23.0, "saldo": 90230, "nota": "", "semaforo": "AMARILLO"}, {"aseguradora": "BERKLEY", "tomador": "CONSORCIO OPUS", "poliza": "106629", "ramo": "CAU05", "placa": "", "inicio_vig": "2026-06-19", "dias_cartera": 21.0, "saldo": 97235, "nota": "", "semaforo": "AMARILLO"}, {"aseguradora": "BOLIVAR", "tomador": "ENVIRONMENTAL S.A.S.", "poliza": "1070562502301", "ramo": "AUTOMOVILES", "placa": "", "inicio_vig": "2026-06-20", "dias_cartera": 20.0, "saldo": 3954182, "nota": "OCR-verificar fecha", "semaforo": "AMARILLO"}, {"aseguradora": "SURA", "tomador": "FABIAN LEONARDO ROJAS CABALLERO", "poliza": "90000878168", "ramo": "SALUD FAMILIAR", "placa": "", "inicio_vig": "2026-06-20", "dias_cartera": 20.0, "saldo": 2650390, "nota": "", "semaforo": "AMARILLO"}, {"aseguradora": "ALLIANZ", "tomador": "MORENO FLORIAN,AUDA MERLEY", "poliza": "23125041", "ramo": "Automóviles", "placa": "JWZ013", "inicio_vig": "2026-06-23", "dias_cartera": 17.0, "saldo": 316076, "nota": "corte 05-jul", "semaforo": "VERDE"}, {"aseguradora": "SURA", "tomador": "LUIS FERNANDO VIDES RIZZO", "poliza": "900000961666", "ramo": "AUTOMOVILES", "placa": "", "inicio_vig": "2026-06-24", "dias_cartera": 16.0, "saldo": 659289, "nota": "", "semaforo": "VERDE"}, {"aseguradora": "BERKLEY", "tomador": "CONSORCIO INGENIERIA EDUCATIVA", "poliza": "106826", "ramo": "CAU05", "placa": "", "inicio_vig": "2026-06-25", "dias_cartera": 15.0, "saldo": 89751, "nota": "", "semaforo": "VERDE"}, {"aseguradora": "SURA", "tomador": "BEATRIZ  GLEN DE DE BEDOUT", "poliza": "90001603519", "ramo": "SALUD FAMILIAR", "placa": "", "inicio_vig": "2026-06-26", "dias_cartera": 14.0, "saldo": 2996541, "nota": "", "semaforo": "VERDE"}, {"aseguradora": "BERKLEY", "tomador": "CONSORCIO AVANCE VIAL", "poliza": "106869", "ramo": "CAU05", "placa": "", "inicio_vig": "2026-06-26", "dias_cartera": 14.0, "saldo": 78244, "nota": "", "semaforo": "VERDE"}, {"aseguradora": "SURA", "tomador": "USOARACATACA", "poliza": "30000950627", "ramo": "INCENDIO", "placa": "", "inicio_vig": "2026-06-27", "dias_cartera": 13.0, "saldo": 385374, "nota": "", "semaforo": "VERDE"}, {"aseguradora": "SBS", "tomador": "RODRIGUEZ MEISEL CAROLINA", "poliza": "1010212", "ramo": "AUTOMOVILES SXKM", "placa": "", "inicio_vig": "2026-06-29", "dias_cartera": 11.0, "saldo": 44000, "nota": "", "semaforo": "VERDE"}, {"aseguradora": "SURA", "tomador": "CALCAREOS S.A.", "poliza": "83002834129", "ramo": "VIDA DE GRUPO", "placa": "", "inicio_vig": "2026-06-30", "dias_cartera": 10.0, "saldo": 313135, "nota": "", "semaforo": "VERDE"}, {"aseguradora": "SURA", "tomador": "DISTRIBUIDORA MUNDIAL DE COMBUSTIBL", "poliza": "900001627114", "ramo": "AUTOMOVILES", "placa": "", "inicio_vig": "2026-06-30", "dias_cartera": 10.0, "saldo": 5214942, "nota": "", "semaforo": "VERDE"}, {"aseguradora": "SURA", "tomador": "GINA PAOLA MARTHE SOLANO", "poliza": "90001236881", "ramo": "SALUD FAMILIAR", "placa": "", "inicio_vig": "2026-06-30", "dias_cartera": 10.0, "saldo": 522899, "nota": "", "semaforo": "VERDE"}, {"aseguradora": "ALLIANZ", "tomador": "VISBAL SALGADO,JAIME ALFONSO", "poliza": "23534861", "ramo": "Vida_Ind", "placa": "", "inicio_vig": "2026-06-30", "dias_cartera": 10.0, "saldo": 505447, "nota": "corte 05-jul", "semaforo": "VERDE"}, {"aseguradora": "SOLIDARIA", "tomador": "OQUENDO ESTRADA JUAN CAMILO", "poliza": "994000004303", "ramo": "AUTOMOVILES PARTIC", "placa": "", "inicio_vig": "2026-06-30", "dias_cartera": 10.0, "saldo": 2772442, "nota": "", "semaforo": "VERDE"}, {"aseguradora": "ALLIANZ", "tomador": "NOGUERA GIESEKEN, RICARDO ADOLFO", "poliza": "23569318", "ramo": "Salud", "placa": "", "inicio_vig": "2026-07-01", "dias_cartera": 9.0, "saldo": 3572847, "nota": "corte 05-jul", "semaforo": "VERDE"}, {"aseguradora": "SURA", "tomador": "MARIA CONCEPCION DE LA ESPRIELLA DES", "poliza": "90001082374", "ramo": "SALUD FAMILIAR", "placa": "", "inicio_vig": "2026-07-01", "dias_cartera": 9.0, "saldo": 3851923, "nota": "", "semaforo": "VERDE"}, {"aseguradora": "SURA", "tomador": "IVONNE ROCIO LIZARAZO CARREYO", "poliza": "90000853599", "ramo": "SALUD FAMILIAR", "placa": "", "inicio_vig": "2026-07-01", "dias_cartera": 9.0, "saldo": 2684452, "nota": "", "semaforo": "VERDE"}, {"aseguradora": "HDI", "tomador": "DE NEGOCIOS Y PROYECTOS SAS SIGLA SONEP", "poliza": "608280", "ramo": "PRODUCTO UNICO DE AUTO", "placa": "IEP662", "inicio_vig": "2026-07-02", "dias_cartera": 8.0, "saldo": 196678, "nota": "", "semaforo": "VERDE"}, {"aseguradora": "HDI", "tomador": "DE NEGOCIOS Y PROYECTOS SAS SIGLA SONEP", "poliza": "608280", "ramo": "PRODUCTO UNICO DE AUTO", "placa": "TFR645", "inicio_vig": "2026-07-02", "dias_cartera": 8.0, "saldo": 732372, "nota": "", "semaforo": "VERDE"}, {"aseguradora": "HDI", "tomador": "DE NEGOCIOS Y PROYECTOS SAS SIGLA SONEP", "poliza": "608280", "ramo": "PRODUCTO UNICO DE AUTO", "placa": "TDW047", "inicio_vig": "2026-07-02", "dias_cartera": 8.0, "saldo": 557850, "nota": "", "semaforo": "VERDE"}, {"aseguradora": "HDI", "tomador": "DE NEGOCIOS Y PROYECTOS SAS SIGLA SONEP", "poliza": "608280", "ramo": "PRODUCTO UNICO DE AUTO", "placa": "NGY563", "inicio_vig": "2026-07-02", "dias_cartera": 8.0, "saldo": 317623, "nota": "", "semaforo": "VERDE"}, {"aseguradora": "HDI", "tomador": "DE NEGOCIOS Y PROYECTOS SAS SIGLA SONEP", "poliza": "608280", "ramo": "PRODUCTO UNICO DE AUTO", "placa": "DTZ332", "inicio_vig": "2026-07-02", "dias_cartera": 8.0, "saldo": 193618, "nota": "", "semaforo": "VERDE"}, {"aseguradora": "HDI", "tomador": "DE NEGOCIOS Y PROYECTOS SAS SIGLA SONEP", "poliza": "608280", "ramo": "PRODUCTO UNICO DE AUTO", "placa": "TTN607", "inicio_vig": "2026-07-02", "dias_cartera": 8.0, "saldo": 732372, "nota": "", "semaforo": "VERDE"}, {"aseguradora": "ALLIANZ", "tomador": "VISBAL SALGADO, RAFAEL ANGEL", "poliza": "23112406", "ramo": "Automóviles", "placa": "DTY933", "inicio_vig": "2026-07-03", "dias_cartera": 7.0, "saldo": 2657005, "nota": "corte 05-jul", "semaforo": "VERDE"}, {"aseguradora": "SURA", "tomador": "MILENA  SARMIENTO RUIZ", "poliza": "900000088866", "ramo": "AUTOMOVILES", "placa": "", "inicio_vig": "2026-07-03", "dias_cartera": 7.0, "saldo": 570417, "nota": "", "semaforo": "VERDE"}, {"aseguradora": "SURA", "tomador": "CINDY MARCELA DURAN LIZARAZO", "poliza": "90001068720", "ramo": "SALUD FAMILIAR", "placa": "", "inicio_vig": "2026-07-03", "dias_cartera": 7.0, "saldo": 1940083, "nota": "", "semaforo": "VERDE"}, {"aseguradora": "SURA", "tomador": "CARLOS ENRIQUE MARTELO LOZANO", "poliza": "900001311753", "ramo": "INCENDIO", "placa": "", "inicio_vig": "2026-07-05", "dias_cartera": 5.0, "saldo": 336144, "nota": "", "semaforo": "VERDE"}, {"aseguradora": "SURA", "tomador": "ASOTUCURINCA", "poliza": "900001556859", "ramo": "AUTOMOVILES", "placa": "", "inicio_vig": "2026-07-07", "dias_cartera": 3.0, "saldo": 357907, "nota": "", "semaforo": "VERDE"}, {"aseguradora": "SOLIDARIA", "tomador": "OQUENDO VILLAMIZAR JOSE DAVID", "poliza": "994000004291", "ramo": "AUTOMOVILES PARTIC", "placa": "", "inicio_vig": "2026-07-07", "dias_cartera": 3.0, "saldo": 105787, "nota": "", "semaforo": "VERDE"}, {"aseguradora": "ALLIANZ", "tomador": "MARTINEZ GUTIERREZ, CARLOS ANDRES", "poliza": "23911146", "ramo": "Automóviles", "placa": "LWW532", "inicio_vig": "2026-07-09", "dias_cartera": 1.0, "saldo": 2441825, "nota": "corte 05-jul", "semaforo": "VERDE"}, {"aseguradora": "HDI", "tomador": "MARTINEZ GUTIERREZ CARLOS ANDRES", "poliza": "94414668", "ramo": "ALTA GAMA HDI", "placa": "LWW532", "inicio_vig": "2026-07-09", "dias_cartera": 1.0, "saldo": 2670246, "nota": "", "semaforo": "VERDE"}, {"aseguradora": "SURA", "tomador": "CARLOS IGNACIO DE LA ROSA MANOTAS", "poliza": "90001656944", "ramo": "SALUD FAMILIAR", "placa": "", "inicio_vig": "2026-07-10", "dias_cartera": 0.0, "saldo": 1184173, "nota": "", "semaforo": "VERDE"}, {"aseguradora": "SURA", "tomador": "KARINA PATRICIA GOMEZ MANOTAS", "poliza": "90001128050", "ramo": "SALUD FAMILIAR", "placa": "", "inicio_vig": "2026-07-12", "dias_cartera": -2.0, "saldo": 399649, "nota": "", "semaforo": "VERDE"}, {"aseguradora": "SURA", "tomador": "MARIA INES CARBONELL BLANCO", "poliza": "90000890361", "ramo": "SALUD FAMILIAR", "placa": "", "inicio_vig": "2026-07-12", "dias_cartera": -2.0, "saldo": 4922632, "nota": "", "semaforo": "VERDE"}, {"aseguradora": "HDI", "tomador": "INVERSIONES SAN JOSE5 M S.A.S", "poliza": "94419858", "ramo": "ALTA GAMA HDI", "placa": "PUR579", "inicio_vig": "2026-07-14", "dias_cartera": -4.0, "saldo": 2613962, "nota": "", "semaforo": "VERDE"}, {"aseguradora": "SURA", "tomador": "ALBERTO DE JESUS ARCIERI NARVAEZ", "poliza": "90001019207", "ramo": "SALUD FAMILIAR", "placa": "", "inicio_vig": "2026-07-15", "dias_cartera": -5.0, "saldo": 6630753, "nota": "", "semaforo": "VERDE"}, {"aseguradora": "SURA", "tomador": "GLOBALAS LIMITADA", "poliza": "90001503343", "ramo": "SALUD FAMILIAR", "placa": "", "inicio_vig": "2026-07-15", "dias_cartera": -5.0, "saldo": 2379676, "nota": "", "semaforo": "VERDE"}, {"aseguradora": "ALLIANZ", "tomador": "BARRAGAN , GABRIEL EDUARDO", "poliza": "23667022", "ramo": "Vida_Ind", "placa": "", "inicio_vig": "2026-07-18", "dias_cartera": -8.0, "saldo": 1064000, "nota": "corte 05-jul", "semaforo": "VERDE"}, {"aseguradora": "SURA", "tomador": "FABIAN LEONARDO ROJAS CABALLERO", "poliza": "90000878168", "ramo": "SALUD FAMILIAR", "placa": "", "inicio_vig": "2026-07-20", "dias_cartera": -10.0, "saldo": 2650390, "nota": "", "semaforo": "VERDE"}, {"aseguradora": "HDI", "tomador": "OLGA ISABEL PRIETO DEVIVES", "poliza": "94423586", "ramo": "ALTA GAMA HDI", "placa": "FON775", "inicio_vig": "2026-07-21", "dias_cartera": -11.0, "saldo": 2618338, "nota": "", "semaforo": "VERDE"}, {"aseguradora": "SOLIDARIA", "tomador": "DOMINGUEZ DE LA HOZ HAROLD JAVIER", "poliza": "994000004346", "ramo": "AUTOMOVILES PARTIC", "placa": "", "inicio_vig": "2026-07-23", "dias_cartera": -13.0, "saldo": 2915083, "nota": "", "semaforo": "VERDE"}, {"aseguradora": "ALLIANZ", "tomador": "MORENO FLORIAN,AUDA MERLEY", "poliza": "23125041", "ramo": "Automóviles", "placa": "JWZ013", "inicio_vig": "2026-07-23", "dias_cartera": -13.0, "saldo": 325466, "nota": "corte 05-jul", "semaforo": "VERDE"}, {"aseguradora": "SURA", "tomador": "BEATRIZ  GLEN DE DE BEDOUT", "poliza": "90001603519", "ramo": "SALUD FAMILIAR", "placa": "", "inicio_vig": "2026-07-26", "dias_cartera": -16.0, "saldo": 2996541, "nota": "", "semaforo": "VERDE"}, {"aseguradora": "ALLIANZ", "tomador": "LEON MORALES,OLGA LUCIA", "poliza": "23671523", "ramo": "Automóviles", "placa": "NUQ270", "inicio_vig": "2026-07-29", "dias_cartera": -19.0, "saldo": 4828758, "nota": "corte 05-jul", "semaforo": "VERDE"}, {"aseguradora": "SURA", "tomador": "ALBERTO  LECOMPTE DE LA VEGA", "poliza": "90000852563", "ramo": "SALUD FAMILIAR", "placa": "", "inicio_vig": "2026-07-29", "dias_cartera": -19.0, "saldo": 22633470, "nota": "", "semaforo": "VERDE"}, {"aseguradora": "SURA", "tomador": "GINA PAOLA MARTHE SOLANO", "poliza": "90001236881", "ramo": "SALUD FAMILIAR", "placa": "", "inicio_vig": "2026-07-30", "dias_cartera": -20.0, "saldo": 522899, "nota": "", "semaforo": "VERDE"}, {"aseguradora": "ALLIANZ", "tomador": "VISBAL SALGADO,JAIME ALFONSO", "poliza": "23534861", "ramo": "Vida_Ind", "placa": "", "inicio_vig": "2026-07-30", "dias_cartera": -20.0, "saldo": 505447, "nota": "corte 05-jul", "semaforo": "VERDE"}, {"aseguradora": "ALLIANZ", "tomador": "RENOWITZKY NOGUERA, GABRIEL EDUARDO", "poliza": "23448650", "ramo": "Vida_Ind", "placa": "", "inicio_vig": "2026-07-30", "dias_cartera": -20.0, "saldo": 588994, "nota": "corte 05-jul", "semaforo": "VERDE"}, {"aseguradora": "SOLIDARIA", "tomador": "INSIGNARES NOGUERA ALEJANDRO MARIO", "poliza": "994000004386", "ramo": "AUTOMOVILES PARTIC", "placa": "", "inicio_vig": "2026-08-14", "dias_cartera": -35.0, "saldo": 2271588, "nota": "", "semaforo": "VERDE"}], "financieras": [{"financiera": "FINESA", "cliente": "BONDI BEACH", "aseguradora": "ALLIANZ", "poliza": "23503953", "placa": "", "dias_mora": 495.0, "saldo": 228401, "estado": "Saldo", "semaforo": "ROJO"}, {"financiera": "FINESA", "cliente": "DE ALBA PEREZ JORGE ALBERTO", "aseguradora": "COMPANIA MUNDIAL DE SE", "poliza": "400007000", "placa": "", "dias_mora": 222.0, "saldo": 283805, "estado": "Saldo", "semaforo": "ROJO"}, {"financiera": "FINESA", "cliente": "OJEDA GUTIERREZ FABIAN ARTUR", "aseguradora": "SOLIDARIA DE COLOMBIA ", "poliza": "994000004478", "placa": "IDM485", "dias_mora": 135.0, "saldo": 414266, "estado": "Saldo", "semaforo": "ROJO"}, {"financiera": "FINESA", "cliente": "NAVAS SOLANO VLADIMIR", "aseguradora": "COMPANIA MUNDIAL DE SE", "poliza": "2000669972", "placa": "SZL062", "dias_mora": 130.0, "saldo": 233568, "estado": "Saldo", "semaforo": "ROJO"}, {"financiera": "FINANCIA YA", "cliente": "SALAMANCA GUEVARA ANA MARIA", "aseguradora": "A31", "poliza": "94516310", "placa": "MHW274", "dias_mora": 32.0, "saldo": 927756, "estado": "En riesgo de cancelación", "semaforo": "ROJO"}, {"financiera": "FINESA", "cliente": "TORRES SIBAJA CLAUDIA PATR", "aseguradora": "ZURICH COLOMBIA SEGURO", "poliza": "228622478", "placa": "KQV262", "dias_mora": 19.0, "saldo": 1153195, "estado": "Normal", "semaforo": "VERDE"}, {"financiera": "FINANCIA YA", "cliente": "FERNANDEZ CUELLO DALILA ROSA", "aseguradora": "A33", "poliza": "94057011", "placa": "HRX071", "dias_mora": 18.0, "saldo": 395920, "estado": "Notificación 2", "semaforo": "VERDE"}, {"financiera": "FINESA", "cliente": "MARIO  INSIGNARES N ALEJANDRO MA", "aseguradora": "SOLIDARIA DE COLOMBIA ", "poliza": "994000004386", "placa": "HEW412", "dias_mora": 18.0, "saldo": 226862, "estado": "En riesgo", "semaforo": "VERDE"}, {"financiera": "FINANCIA YA", "cliente": "COND RESERVA CAMPESTRE RIVIERA DEL MAR", "aseguradora": "M42", "poliza": "611798", "placa": "", "dias_mora": 12.0, "saldo": 1171246, "estado": "Notificación 1", "semaforo": "VERDE"}, {"financiera": "FINANCIA YA", "cliente": "DIAZ GRANADOS CONSUEGRA CLAUDIA PATRICIA", "aseguradora": "T58", "poliza": "93056414", "placa": "", "dias_mora": 7.0, "saldo": 527386, "estado": "Notificación 1", "semaforo": "VERDE"}, {"financiera": "FINESA", "cliente": "AVENDANO CARO ZENITH MARIA", "aseguradora": "COMPANIA MUNDIAL DE SE", "poliza": "2000362505", "placa": "SBL263", "dias_mora": 1.0, "saldo": 970773, "estado": "Normal", "semaforo": "VERDE"}, {"financiera": "FINESA", "cliente": "JABBA MOLINARES DALADIER", "aseguradora": "ALLIANZ", "poliza": "23807069", "placa": "GJM568", "dias_mora": 0.0, "saldo": 1319990, "estado": "Normal", "semaforo": "VERDE"}, {"financiera": "FINESA", "cliente": "MARTINEZ GARCIA MELISA MARTA", "aseguradora": "COMPANIA MUNDIAL DE SE", "poliza": "2000500392", "placa": "GQV012", "dias_mora": 0.0, "saldo": 889263, "estado": "Normal", "semaforo": "VERDE"}, {"financiera": "FINESA", "cliente": "SICLIMIT SAS", "aseguradora": "COMPANIA MUNDIAL DE SE", "poliza": "250012592", "placa": "", "dias_mora": 0.0, "saldo": 10265164, "estado": "Normal", "semaforo": "VERDE"}, {"financiera": "FINESA", "cliente": "ASOTUCURINCA", "aseguradora": "COMPANIA MUNDIAL DE SE", "poliza": "2000681918", "placa": "LIT048", "dias_mora": 0.0, "saldo": 3935559, "estado": "Normal", "semaforo": "VERDE"}, {"financiera": "FINESA", "cliente": "CONDOMINIO MARINA CLUB LAGOMAR", "aseguradora": "SEGUROS DEL ESTADO S.A", "poliza": "101000848", "placa": "", "dias_mora": 0.0, "saldo": 13441072, "estado": "Normal", "semaforo": "VERDE"}, {"financiera": "FINESA", "cliente": "OLIER ARROYO ARTURO FABIO", "aseguradora": "ALLIANZ", "poliza": "023617714", "placa": "EPS101", "dias_mora": 0.0, "saldo": 2785999, "estado": "Normal", "semaforo": "VERDE"}, {"financiera": "FINESA", "cliente": "SANCHEZ CAHUANA DENNYS", "aseguradora": "ALLIANZ", "poliza": "023264750", "placa": "MXN100", "dias_mora": 0.0, "saldo": 2749105, "estado": "Normal", "semaforo": "VERDE"}, {"financiera": "FINESA", "cliente": "COMBUSTIBLES LA GRANJA SAS", "aseguradora": "ZURICH COLOMBIA SEGURO", "poliza": "238120330", "placa": "", "dias_mora": 0.0, "saldo": 1312459, "estado": "Normal", "semaforo": "VERDE"}, {"financiera": "FINESA", "cliente": "VISBAL SALGADO RAFAEL ANGEL", "aseguradora": "ALLIANZ", "poliza": "023112406", "placa": "DTY933", "dias_mora": 0.0, "saldo": 1752693, "estado": "Normal", "semaforo": "VERDE"}, {"financiera": "FINESA", "cliente": "INVERSIONES LA VICTORIA OIL SAS", "aseguradora": "ZURICH COLOMBIA SEGURO", "poliza": "224618441", "placa": "", "dias_mora": 0.0, "saldo": 499102, "estado": "Normal", "semaforo": "VERDE"}, {"financiera": "FINESA", "cliente": "RUGELO SAS", "aseguradora": "ZURICH COLOMBIA SEGURO", "poliza": "248501618", "placa": "", "dias_mora": 0.0, "saldo": 4263035, "estado": "Normal", "semaforo": "VERDE"}, {"financiera": "FINESA", "cliente": "LP GRUAS Y CONSTRUCCIONES SAS", "aseguradora": "LA PREVISORA S.A. COMP", "poliza": "1000458", "placa": "", "dias_mora": 0.0, "saldo": 1840061, "estado": "Normal", "semaforo": "VERDE"}, {"financiera": "FINESA", "cliente": "EDIFICIO LAS PALMAS", "aseguradora": "SBS SEGUROS COLOMBIA S", "poliza": "53304110004772", "placa": "", "dias_mora": 0.0, "saldo": 10291384, "estado": "Normal", "semaforo": "VERDE"}, {"financiera": "FINANCIA YA", "cliente": "MAURICIO ISAAC ROMEO OTERO", "aseguradora": "A33", "poliza": "94289419", "placa": "GKL553", "dias_mora": null, "saldo": 1443439, "estado": "-", "semaforo": "VERDE"}, {"financiera": "FINANCIA YA", "cliente": "ALVAREZ CORREA LOPEZ MAURICIO", "aseguradora": "A33", "poliza": "580306", "placa": "LWW508", "dias_mora": null, "saldo": 2062588, "estado": "-", "semaforo": "VERDE"}, {"financiera": "FINANCIA YA", "cliente": "SANDRA GABRIELA URIBE ALVAREZ", "aseguradora": "A31", "poliza": "94245703", "placa": "QHT205", "dias_mora": null, "saldo": 1260728, "estado": "-", "semaforo": "VERDE"}, {"financiera": "FINANCIA YA", "cliente": "SUAREZ SUAREZ RAQUEL PATRICIA", "aseguradora": "A31", "poliza": "94414034", "placa": "NUP939", "dias_mora": null, "saldo": 1420770, "estado": "-", "semaforo": "VERDE"}, {"financiera": "FINANCIA YA", "cliente": "ALVAREZ CORREA LOPEZ MAURICIO", "aseguradora": "A33", "poliza": "570726", "placa": "JNP052", "dias_mora": null, "saldo": 3146355, "estado": "-", "semaforo": "VERDE"}]};
+let SEC='aseg';
+let sort={key:'dias_cartera',dir:-1};
+const money=v=>'$'+Math.round(v).toLocaleString('es-CO');
+const COLS={
+ aseg:[['aseguradora','Aseguradora','t'],['tomador','Tomador / Cliente','t'],['poliza','Póliza','t'],
+   ['ramo','Ramo','t'],['inicio_vig','Inicio vig.','c'],['dias_cartera','Días cartera','c'],
+   ['saldo','Saldo por pagar','n'],['semaforo','Semáforo','c']],
+ fin:[['financiera','Financiera','t'],['cliente','Cliente','t'],['aseguradora','Aseg./Ramo','t'],
+   ['poliza','Póliza','t'],['placa','Placa','c'],['dias_mora','Días mora','c'],
+   ['saldo','Saldo','n'],['estado','Estado','t'],['semaforo','Semáforo','c']]
+};
+const semClass=s=>s==='ROJO'?'r':s==='AMARILLO'?'a':'v';
+function rows(){return SEC==='aseg'?DATA.aseguradoras:DATA.financieras;}
+function nameField(){return SEC==='aseg'?'tomador':'cliente';}
+
+function fillClientes(){
+ const nf=nameField();
+ const names=[...new Set(rows().map(r=>r[nf]))].sort((a,b)=>a.localeCompare(b));
+ const sel=document.getElementById('cliente');
+ sel.innerHTML='<option value="">— Todos —</option>'+names.map(n=>`<option>${esc(n)}</option>`).join('');
+}
+function fillAseg(){
+ const names=[...new Set(DATA.aseguradoras.map(r=>r.aseguradora))].sort();
+ document.getElementById('aseg').innerHTML='<option value="">— Todas —</option>'+names.map(n=>`<option>${n}</option>`).join('');
+}
+function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
+
+function filtered(){
+ const nf=nameField();
+ const cli=document.getElementById('cliente').value;
+ const ag=document.getElementById('aseg').value;
+ const sm=document.getElementById('sem').value;
+ const q=document.getElementById('q').value.trim().toLowerCase();
+ let out=rows().filter(r=>{
+   if(cli && r[nf]!==cli) return false;
+   if(SEC==='aseg' && ag && r.aseguradora!==ag) return false;
+   if(sm && r.semaforo!==sm) return false;
+   if(q){const blob=Object.values(r).join(' ').toLowerCase(); if(!blob.includes(q)) return false;}
+   return true;
+ });
+ const k=sort.key;
+ out.sort((a,b)=>{let x=a[k],y=b[k];
+   if(typeof x==='number'||typeof y==='number'){x=x==null?-1e15:x;y=y==null?-1e15:y;return (x-y)*sort.dir;}
+   return String(x).localeCompare(String(y))*sort.dir;});
+ return out;
+}
+
+function render(){
+ const cols=COLS[SEC], data=filtered();
+ // KPIs
+ const tot=data.reduce((s,r)=>s+r.saldo,0);
+ const grp=s=>{const x=data.filter(r=>r.semaforo===s);return[x.length,x.reduce((a,r)=>a+r.saldo,0)];};
+ const [nr,mr]=grp('ROJO'),[na,ma]=grp('AMARILLO'),[nv,mv]=grp('VERDE');
+ document.getElementById('kpis').innerHTML=`
+  <div class="kpi tot"><div class="t">TOTAL (VISTA ACTUAL)</div><div class="v">${money(tot)}</div><div class="s">${data.length} registros</div></div>
+  <div class="kpi r"><div class="t">ROJO ≥30 días</div><div class="v">${money(mr)}</div><div class="s">${nr} pólizas</div></div>
+  <div class="kpi a"><div class="t">AMARILLO 20–29</div><div class="v">${money(ma)}</div><div class="s">${na} pólizas</div></div>
+  <div class="kpi v"><div class="t">VERDE &lt;20 días</div><div class="v">${money(mv)}</div><div class="s">${nv} pólizas</div></div>`;
+ // head
+ const thead=document.querySelector('#tbl thead');
+ thead.innerHTML='<tr><th class="ctr">#</th>'+cols.map(c=>{
+   const cls=c[2]==='n'?'num':c[2]==='c'?'ctr':'';
+   const ar=sort.key===c[0]?(sort.dir<0?'▼':'▲'):'';
+   return `<th class="${cls}" onclick="setSort('${c[0]}')">${c[1]} <span class="ar">${ar}</span></th>`;}).join('')+'</tr>';
+ // body
+ const tb=document.querySelector('#tbl tbody');
+ tb.innerHTML=data.map((r,i)=>{
+   const tds=cols.map(c=>{
+     let v=r[c[0]];const cls=c[2]==='n'?'num':c[2]==='c'?'ctr':'';
+     if(c[0]==='saldo') v=money(v);
+     else if(c[0]==='dias_cartera'){v=(v==null?'s/f':(v<0?'0*':v));}
+     else if(c[0]==='dias_mora'){v=(v==null?'—':v);}
+     else if(c[0]==='inicio_vig'){v=v||'—';}
+     else if(c[0]==='semaforo'){return `<td class="ctr sem ${semClass(r.semaforo)}">● ${r.semaforo}</td>`;}
+     else if(c[0]==='placa'||c[0]==='estado'){v=v||'—';}
+     return `<td class="${cls}">${esc(v)}</td>`;}).join('');
+   return `<tr class="${semClass(r.semaforo)}"><td class="ctr">${i+1}</td>${tds}</tr>`;}).join('');
+ // meta + note
+ const cli=document.getElementById('cliente').value;
+ document.getElementById('meta').textContent=`${data.length} registros · Total ${money(tot)}`+(cli?` · Cliente: ${cli}`:'');
+ document.getElementById('note').innerHTML = SEC==='aseg'
+   ? '* Días = 0: vigencia inicia en fecha futura (emitida y con saldo, aún sin días en cartera). Zurich es del 3-jul (no actualizado); Bolívar por OCR (verificar fechas). Se excluyó la colectiva 4G ARCHITECTURE SAS.'
+   : 'Primas financiadas: la métrica es días de MORA de la financiación (no días en cartera). El cliente le debe a la financiera.';
+ // print header
+ document.getElementById('printhead').innerHTML=
+   `<b>Relación de cartera — ${SEC==='aseg'?'Aseguradoras':'Financiadas'}</b>`+
+   (cli?` · Cliente: ${esc(cli)}`:' · Todos los clientes')+
+   ` · ${data.length} registros · Total ${money(tot)} · Corte 10-jul-2026`;
+}
+function setSort(k){ if(sort.key===k) sort.dir*=-1; else {sort.key=k; sort.dir=(k==='saldo'||k==='dias_cartera'||k==='dias_mora')?-1:1;} render(); }
+function setSec(s){ SEC=s; sort={key:(s==='aseg'?'dias_cartera':'dias_mora'),dir:-1};
+ document.getElementById('tabA').classList.toggle('on',s==='aseg');
+ document.getElementById('tabF').classList.toggle('on',s==='fin');
+ document.getElementById('lblAseg').style.display=(s==='aseg')?'flex':'none';
+ document.getElementById('cliente').value=''; document.getElementById('aseg').value='';
+ document.getElementById('sem').value=''; document.getElementById('q').value='';
+ fillClientes(); render(); }
+function clearF(){document.getElementById('cliente').value='';document.getElementById('aseg').value='';
+ document.getElementById('sem').value='';document.getElementById('q').value='';render();}
+function expCSV(){
+ const cols=COLS[SEC],data=filtered();
+ const head=['#',...cols.map(c=>c[1])];
+ const lines=[head.join(';')];
+ data.forEach((r,i)=>{const row=[i+1,...cols.map(c=>{let v=r[c[0]];if(v==null)v='';return String(v).replace(/;/g,',');})];lines.push(row.join(';'));});
+ const cli=document.getElementById('cliente').value;
+ const blob=new Blob(['﻿'+lines.join('\n')],{type:'text/csv;charset=utf-8'});
+ const a=document.createElement('a');a.href=URL.createObjectURL(blob);
+ a.download='Cartera_GLOBALAS_'+(SEC)+(cli?('_'+cli.replace(/[^a-z0-9]+/gi,'_')):'')+'_2026-07-10.csv';
+ a.click();
+}
+['cliente','aseg','sem'].forEach(id=>document.getElementById(id).addEventListener('change',render));
+document.getElementById('q').addEventListener('input',render);
+fillAseg(); fillClientes(); render();
+</script>
+</body>
+</html>
